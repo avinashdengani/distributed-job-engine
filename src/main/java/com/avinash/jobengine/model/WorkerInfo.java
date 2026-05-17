@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 
 public class WorkerInfo {
     private String id;
-    private String status;
+    private WorkerStatus status;
     private LocalDateTime lastHeartbeat;
     private int jobsProcessed;
     private int jobsFailed;
 
     public WorkerInfo(String id) {
         this.id = id;
-        this.status = "ACTIVE";
+        this.status = WorkerStatus.ACTIVE;
         this.lastHeartbeat = LocalDateTime.now();
         this.jobsProcessed = 0;
         this.jobsFailed = 0;
@@ -24,10 +24,10 @@ public class WorkerInfo {
         this.id = id;
     }
 
-    public String getStatus() {
+    public WorkerStatus getStatus() {
         return status;
     }
-    public void setStatus(String status) {
+    public void setStatus(WorkerStatus status) {
         this.status = status;
     }
 
@@ -55,7 +55,7 @@ public class WorkerInfo {
 
     public void recordHeartbeat() {
         this.lastHeartbeat = LocalDateTime.now();
-        this.status = "ACTIVE";
+        this.status = WorkerStatus.ACTIVE;
     }
 
     public void recordJobCompleted() {
@@ -71,12 +71,12 @@ public class WorkerInfo {
             return false;
         }
 
-        return LocalDateTime.now().isBefore(lastHeartbeat.plusSeconds(timeoutSeconds));
+        return LocalDateTime.now().isBefore(lastHeartbeat.plusSeconds(timeoutSeconds)) && status.isAlive();
     }
 
     public void markDead() {
         lastHeartbeat = null;
-        this.status = "DEAD";
+        this.status = WorkerStatus.DEAD;
     }
 
     @Override
