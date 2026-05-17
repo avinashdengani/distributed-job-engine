@@ -1,31 +1,51 @@
 package com.avinash.jobengine;
 
-import com.avinash.jobengine.model.worker.WorkerInfo;
+import com.avinash.jobengine.model.job.Job;
+import com.avinash.jobengine.model.job.JobStatus;
+import com.avinash.jobengine.model.job.JobType;
+import com.avinash.jobengine.repository.JobRepository;
+
+import java.util.Optional;
+import java.util.TimeZone;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
 
-        // Create worker
-        WorkerInfo worker = new WorkerInfo("worker-1");
-        System.out.println("Created : " + worker);
+        JobRepository repo = new JobRepository();
 
-        // Simulate processing jobs
-        worker.recordJobCompleted();
-        worker.recordJobCompleted();
-        worker.recordJobFailed();
-        System.out.println("After jobs: " + worker);
+        System.setProperty("user.timezone", "UTC");
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
-        // Simulate heartbeat
-        Thread.sleep(2000);
-        System.out.println("Alive (5s timeout): " + worker.isAlive(5));
-        System.out.println("Alive (1s timeout): " + worker.isAlive(1));
+        // Test 1 — Insert a job
+        Job job = new Job(JobType.EMAIL, "{\"to\":\"user@example.com\"}");
+        repo.insert(job);
+        System.out.println("Inserted: " + job);
 
-        // Record fresh heartbeat
-        worker.recordHeartbeat();
-        System.out.println("After heartbeat: " + worker);
+        // Test 2 — Find by ID
+        Optional<Job> found = repo.findById(job.getId());
+        found.ifPresent(j -> System.out.println("Found: " + j));
 
-        // Simulate worker dying
-        worker.markDead();
-        System.out.println("After death: " + worker);
+        // Test 3 — Update status
+        job.markProcessing("worker-1");
+        repo.updateStatus(job);
+        System.out.println("Updated to PROCESSING");
+
+        // Test 4 — Complete the job
+        job.markCompleted(287);
+        repo.updateStatus(job);
+        System.out.println("Updated to COMPLETED");
+
+        // Test 5 — Count by status
+        int completed = repo.countByStatus(JobStatus.COMPLETED);
+        System.out.println("Completed jobs in DB: " + completed);
+
+        // Test 6 — Audit
+        repo.insertAudit(job.getId(), JobStatus.PENDING,
+                JobStatus.PROCESSING, "worker-1", "picked up");
+        System.out.println("Audit recorded");
+
+        // Test 7 — Idempotency — insert same job again
+        repo.insert(job);
+        System.out.println("Duplicate insert ignored — no error");
     }
 }

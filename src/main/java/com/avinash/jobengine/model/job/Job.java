@@ -29,6 +29,10 @@ public class Job {
         this.maxRetries  = 3;
     }
 
+    public Job() {
+
+    }
+
     public String getId() {
         return id;
     }
