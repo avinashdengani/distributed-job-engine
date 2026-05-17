@@ -1,6 +1,6 @@
 package com.avinash.jobengine;
 
-import com.avinash.jobengine.model.WorkerInfo;
+import com.avinash.jobengine.model.worker.WorkerInfo;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {

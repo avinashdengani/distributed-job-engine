@@ -1,4 +1,4 @@
-package com.avinash.jobengine.model;
+package com.avinash.jobengine.model.job;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
