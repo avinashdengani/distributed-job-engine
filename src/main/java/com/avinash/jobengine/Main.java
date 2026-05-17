@@ -1,34 +1,31 @@
 package com.avinash.jobengine;
 
-import com.avinash.jobengine.model.Job;
-import com.avinash.jobengine.model.JobType;
+import com.avinash.jobengine.model.WorkerInfo;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
 
-        // Create a job
-        Job job = new Job(JobType.EMAIL, "{\"to\":\"user@example.com\"}");
-        System.out.println("Created  : " + job);
+        // Create worker
+        WorkerInfo worker = new WorkerInfo("worker-1");
+        System.out.println("Created : " + worker);
 
-        // Simulate worker picking it up
-        job.markProcessing("worker-1");
-        System.out.println("Processing: " + job);
+        // Simulate processing jobs
+        worker.recordJobCompleted();
+        worker.recordJobCompleted();
+        worker.recordJobFailed();
+        System.out.println("After jobs: " + worker);
 
-        // Simulate failure
-        job.markFailed("SMTP connection timeout");
-        System.out.println("Failed   : " + job);
+        // Simulate heartbeat
+        Thread.sleep(2000);
+        System.out.println("Alive (5s timeout): " + worker.isAlive(5));
+        System.out.println("Alive (1s timeout): " + worker.isAlive(1));
 
-        // Can we retry?
-        System.out.println("Can retry: " + job.canRetry());
-        job.incrementRetry();
-        System.out.println("Retrying : " + job);
+        // Record fresh heartbeat
+        worker.recordHeartbeat();
+        System.out.println("After heartbeat: " + worker);
 
-        // Simulate success on retry
-        job.markProcessing("worker-2");
-        job.markCompleted(287);
-        System.out.println("Completed: " + job);
-
-        // Can we retry a completed job?
-        System.out.println("Can retry completed: " + job.canRetry());
+        // Simulate worker dying
+        worker.markDead();
+        System.out.println("After death: " + worker);
     }
 }
