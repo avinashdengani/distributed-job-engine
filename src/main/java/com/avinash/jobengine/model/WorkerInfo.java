@@ -75,7 +75,6 @@ public class WorkerInfo {
     }
 
     public void markDead() {
-        lastHeartbeat = null;
         this.status = WorkerStatus.DEAD;
     }
 
